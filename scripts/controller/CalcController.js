@@ -42,9 +42,83 @@ class CalcController {
         this._operation.pop();
     }
 
+    //Método que pega a ultima operação
+    getLastOperation() {
+        return this._operation[this._operation.length - 1];
+    }
+
+    //Método para pegar a ultima posição do array e substituir
+    setLastOperation(value) {
+        this._operation[this._operation.length - 1] = value;
+    }
+
+    //Método que verifica se é um operador
+    isOperator(value) {
+        return (['+', '-', '*', '/', '%'].indexOf(value) > -1);
+    }
+
+    //Método que faz um push no elemento e soma ele antes de colocar outro sinal matematico
+    pushOperation(value) {
+        this._operation.push(value);
+
+        if (this._operation.length > 3) {
+
+            this.calc();
+        }
+    }
+
+    //Método feito para calcular os dados
+    calc() {
+
+        let last = this._operation.pop();
+
+        let result = eval(this._operation.join(""));
+
+        this._operation = [result, last];
+
+    }
+
+    //Método para mostrar os numeros no display
+    setLastNumberToDisplay() {
+
+    }
+
     //Método para incluir um dado no array
     addOperation(value) {
-        this._operation.push(value);
+
+        if (isNaN(this.getLastOperation())) {
+
+            if (this.isOperator(value)) {
+
+                this.setLastOperation(value);
+
+            } else if (isNaN(value)) {
+
+                console.log("Outra Coisa", value);
+
+            } else {
+
+                this._operation.push(value);
+            }
+
+        } else {
+
+            if (this.isOperator(value)) {
+
+                this._operation.push(value);
+
+            } else {
+
+                let newValue = this.getLastOperation().toString() + value.toString();
+                this.setLastOperation(parseInt(newValue));
+
+                //Atualizar Display
+                this.setLastNumberToDisplay();
+            }
+        }
+
+
+        console.log(this._operation);
     }
 
     // Método para mostrar o error
@@ -64,21 +138,30 @@ class CalcController {
                 break;
 
             case 'soma':
+                this.addOperation('+');
                 break;
 
             case 'subtracao':
+                this.addOperation('-');
                 break;
 
             case 'divisao':
+                this.addOperation('/');
                 break;
 
             case 'multiplicacao':
+                this.addOperation('*');
                 break;
 
             case 'porcento':
+                this.addOperation('%');
                 break;
 
             case 'igual':
+                break;
+
+            case 'ponto':
+                this.addOperation('.');
                 break;
 
             case '0':
