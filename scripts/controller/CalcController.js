@@ -76,11 +76,25 @@ class CalcController {
 
         this._operation = [result, last];
 
+        this.setLastNumberToDisplay();
+
     }
 
     //Método para mostrar os numeros no display
     setLastNumberToDisplay() {
 
+        let lastNumber;
+
+        for (let i = this._operation.length - 1; i >= 0; i--) {
+
+            if (!this.isOperator(this._operation[i])) {
+                lastNumber = this._operation[i];
+                break;
+            }
+        }
+
+        //Mostrando o resultado na tela
+        this.displayCalc = lastNumber;
     }
 
     //Método para incluir um dado no array
@@ -98,14 +112,16 @@ class CalcController {
 
             } else {
 
-                this._operation.push(value);
+                this.pushOperation(value);
+
+                this.setLastNumberToDisplay();
             }
 
         } else {
 
             if (this.isOperator(value)) {
 
-                this._operation.push(value);
+               this.pushOperation(value);
 
             } else {
 
@@ -117,8 +133,6 @@ class CalcController {
             }
         }
 
-
-        console.log(this._operation);
     }
 
     // Método para mostrar o error
