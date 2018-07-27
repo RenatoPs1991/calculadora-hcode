@@ -3,6 +3,9 @@ class CalcController {
 //Método construtor
     constructor() {
 
+        this._lastOperator = '';
+        this._lastNumber = '';
+
         this._operation = [];
         this._locale = "pt-BR";
         this._displayCalcEl = document.querySelector("#display");
@@ -36,6 +39,8 @@ class CalcController {
     clearAll() {
 
         this._operation = [];
+        this._lastNumber = '';
+        this._lastOperator = '';
 
         this.setLastNumberToDisplay();
 
@@ -74,16 +79,42 @@ class CalcController {
         }
     }
 
+    //Método para mostrar o resultado da operação
+    getResult() {
+
+        return eval(this._operation.join(""));
+
+    }
+
 //Método feito para calcular os dados
     calc() {
 
         let last = '';
 
-        if (this._operation.length > 3) {
-            last = this._operation.pop();
+        this._lastOperator = this.getLastItem();
+
+        if (this._operation.length < 3) {
+
+            let firstItem = this._operation[0];
+            this._operation = [firstItem, this._lastOperator, this._lastNumber];
+
         }
 
-        let result = eval(this._operation.join(""));
+        if (this._operation.length > 3) {
+
+            last = this._operation.pop();
+            this._lastNumber = this.getResult();
+
+        } else if (this._operation.length === 3) {
+
+            this._lastNumber = this.getLastOperation(false);
+
+        }
+
+//        console.log('_lastOperator', this._lastOperator);
+//        console.log('_lastNumber', this._lastNumber);
+
+        let result = this.getResult();
 
         if (last === '%') {
 
@@ -103,17 +134,31 @@ class CalcController {
         this.setLastNumberToDisplay();
     }
 
-//Método para mostrar os numeros no display
-    setLastNumberToDisplay() {
+    //metodo para percorrer o array e trazer o ultimo numero
+    getLastItem(isOperator = true) {
 
-        let lastNumber;
+        let lastItem;
+
         for (let i = this._operation.length - 1; i >= 0; i--) {
 
-            if (!this.isOperator(this._operation[i])) {
-                lastNumber = this._operation[i];
+            if (this.isOperator(this._operation[i]) === isOperator) {
+                lastItem = this._operation[i];
                 break;
             }
         }
+
+        if (!lastItem) {
+
+            lastItem = (isOperator) ? this._lastOperator : this._lastNumber;
+
+        }
+
+        return lastItem;
+    }
+//Método para mostrar os numeros no display
+    setLastNumberToDisplay() {
+
+        let lastNumber = this.getLastItem(false);
 
         if (!lastNumber)
             lastNumber = 0;
@@ -123,16 +168,14 @@ class CalcController {
     }
 
 //Método para incluir um dado no array
-    addOperation(value) {
+    addOperation(value)
+    {
 
         if (isNaN(this.getLastOperation())) {
 
             if (this.isOperator(value)) {
 
                 this.setLastOperation(value);
-            } else if (isNaN(value)) {
-
-                console.log("Outra Coisa", value);
             } else {
 
                 this.pushOperation(value);
@@ -147,7 +190,7 @@ class CalcController {
             } else {
 
                 let newValue = this.getLastOperation().toString() + value.toString();
-                this.setLastOperation(parseInt(newValue));
+                this.setLastOperation(parseFloat(newValue));
                 //Atualizar Display
                 this.setLastNumberToDisplay();
             }
@@ -156,12 +199,33 @@ class CalcController {
     }
 
 // Método para mostrar o error
-    setError() {
+    setError()
+    {
         this.displayCalc = "Error";
     }
 
+// Método para colocar o ponto e fazer os calculos com numeros FLOAT
+    addDot() {
+
+        let lastOperation = this.getLastOperation();
+
+        if (this.isOperator(lastOperation) || !lastOperation) {
+
+            this.pushOperation('0.');
+
+        } else {
+
+            this.setLastOperation(lastOperation.toString() + '.');
+
+        }
+
+        this.setLastNumberToDisplay();
+
+    }
+
 //Método para identificar cada tecla e retornar uma ação de acordo com o nome da class
-    execBtn(value) {
+    execBtn(value)
+    {
         switch (value) {
             case 'ac':
                 this.clearAll();
@@ -188,7 +252,7 @@ class CalcController {
                 this.calc();
                 break;
             case 'ponto':
-                this.addOperation('.');
+                this.addDot();
                 break;
             case '0':
             case '1':
@@ -209,7 +273,8 @@ class CalcController {
     }
 
 //Método para selecionar os botões para chamar o valor deles
-    initButtonsEvents() {
+    initButtonsEvents()
+    {
         let buttons = document.querySelectorAll("#buttons > g, #parts > g");
         buttons.forEach((btn, index) => {
             this.addEventListenerAll(btn, 'click drag', e => {
@@ -223,7 +288,8 @@ class CalcController {
     }
 
 //Método para pegar a hora dinamicamente
-    setDisplayDateTime() {
+    setDisplayDateTime()
+    {
 
         this.displayDate = this.currentDate.toLocaleDateString(this._locale, {
             day: "2-digit",
