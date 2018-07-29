@@ -3,6 +3,8 @@ class CalcController {
 //Método construtor
     constructor() {
 
+        this._audio = new Audio('click.mp3');
+        this._audioOnOff = false;
         this._lastOperator = '';
         this._lastNumber = '';
 
@@ -18,6 +20,38 @@ class CalcController {
 
     }
 
+    //Método que cola da área de tranferência para a calculadora
+    pasteFromClipboard() {
+
+        document.addEventListener('paste', e => {
+
+            let text = e.clipboardData.getData('Text');
+
+            this.displayCalc = parseFloat(text);
+
+//            console.log(text);
+
+        });
+
+    }
+
+    //Método que copia para a área de transferência
+    copyToClipboard() {
+
+        let input = document.createElement('input');
+
+        input.value = this.displayCalc;
+
+        document.body.appendChild(input);
+
+        input.select();
+
+        document.execCommand("Copy");
+
+        input.remove();
+
+    }
+
 //Método de inicialização para manipulação do DOM
     initialize() {
 
@@ -27,6 +61,37 @@ class CalcController {
         }, 1000);
 
         this.setLastNumberToDisplay();
+        this.pasteFromClipboard();
+
+        document.querySelectorAll('.btn-ac').forEach(btn => {
+
+            btn.addEventListener('dblclick', e => {
+
+                this.toggleAudio();
+
+            });
+
+        });
+
+    }
+
+    //Método que verifica se o audio da calculadora está ligado ou desligado
+    toggleAudio() {
+
+        this._audioOnOff = !this._audioOnOff;
+
+    }
+
+    //Método que faz tocar o som
+    playAudio() {
+
+        if (this._audioOnOff) {
+
+            this._audio.currentTime = 0;
+            this._audio.play();
+
+        }
+
     }
 
     //Método para inicilizar os eventos de teclado da calculadora
@@ -34,6 +99,8 @@ class CalcController {
 
         document.addEventListener('keyup', e => {
 //            console.log(e.key);
+
+            this.playAudio();
 
             switch (e.key) {
                 case 'Escape':
@@ -68,6 +135,12 @@ class CalcController {
                 case '8':
                 case '9':
                     this.addOperation(parseInt(e.key));
+                    break;
+
+                case 'c':
+                    if (e.ctrlKey) {
+                        this.copyToClipboard();
+                    }
                     break;
             }
         });
@@ -274,8 +347,10 @@ class CalcController {
     }
 
 //Método para identificar cada tecla e retornar uma ação de acordo com o nome da class
-    execBtn(value)
-    {
+    execBtn(value) {
+
+        this.playAudio();
+
         switch (value) {
             case 'ac':
                 this.clearAll();
