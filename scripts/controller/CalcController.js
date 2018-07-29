@@ -14,6 +14,8 @@ class CalcController {
         this._currentDate;
         this.initialize();
         this.initButtonsEvents();
+        this.initKeyBoard();
+
     }
 
 //Método de inicialização para manipulação do DOM
@@ -25,6 +27,51 @@ class CalcController {
         }, 1000);
 
         this.setLastNumberToDisplay();
+    }
+
+    //Método para inicilizar os eventos de teclado da calculadora
+    initKeyBoard() {
+
+        document.addEventListener('keyup', e => {
+//            console.log(e.key);
+
+            switch (e.key) {
+                case 'Escape':
+                    this.clearAll();
+                    break;
+                case 'Backspace':
+                    this.clearEntry();
+                    break;
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '%':
+                    this.addOperation(e.key);
+                    break;
+                case 'Enter':
+                case '=':
+                    this.calc();
+                    break;
+                case '.':
+                case ',':
+                    this.addDot();
+                    break;
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    this.addOperation(parseInt(e.key));
+                    break;
+            }
+        });
+
     }
 
 //Método de criação de eventos
@@ -190,7 +237,7 @@ class CalcController {
             } else {
 
                 let newValue = this.getLastOperation().toString() + value.toString();
-                this.setLastOperation(parseFloat(newValue));
+                this.setLastOperation(newValue);
                 //Atualizar Display
                 this.setLastNumberToDisplay();
             }
@@ -209,6 +256,9 @@ class CalcController {
 
         let lastOperation = this.getLastOperation();
 
+        if (typeof lastOperation === 'string' && lastOperation.split('').indexOf('.') > -1) {
+            return;
+        }
         if (this.isOperator(lastOperation) || !lastOperation) {
 
             this.pushOperation('0.');
